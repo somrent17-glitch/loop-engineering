@@ -19,6 +19,7 @@ Each pattern answers:
 | CI Sweeper | 5–15m | Medium | [ci-sweeper.md](./ci-sweeper.md) |
 | Post-Merge Cleanup | 1d–6h | Low | [post-merge-cleanup.md](./post-merge-cleanup.md) |
 | Dependency Sweeper | 6h–1d | Medium | [dependency-sweeper.md](./dependency-sweeper.md) |
+| Changelog Drafter | 1d | Low | [changelog-drafter.md](./changelog-drafter.md) |
 
 Machine-readable index: [registry.yaml](./registry.yaml)
 
@@ -28,12 +29,9 @@ Machine-readable index: [registry.yaml](./registry.yaml)
 2. Scaffold with `npx @cobusgreyling/loop-init . --pattern <name> --tool grok` or copy from `starters/`
 3. Copy skills from `templates/` if customizing beyond the starter
 4. Set up scheduling (`/loop`, `scheduler_create`, GitHub Action, Codex Automation)
-5. Create the initial state file (or let `loop-init` do it)
-6. Start the loop — **report-only first** when the pattern supports phased rollout
-7. Iterate on the loop definition based on what actually happens
+5. Run week one in **L1 report-only** mode before enabling fixes
+6. Audit with `npx @cobusgreyling/loop-audit . --suggest`
 
-Good loops are boring and reliable. Start with one that runs every few hours or daily before going to sub-minute cadences.
+## Adding a Pattern
 
-## Contributing a Pattern
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) and [templates/pattern-template.md](../templates/pattern-template.md).
+Use [templates/pattern-template.md](../templates/pattern-template.md), add an entry to `registry.yaml`, and open a PR. See [CONTRIBUTING.md](../CONTRIBUTING.md).

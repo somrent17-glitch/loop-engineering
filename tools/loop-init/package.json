@@ -1,6 +1,6 @@
 {
   "name": "@cobusgreyling/loop-init",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Scaffold loop engineering starters into your project by pattern and tool.",
   "type": "module",
   "bin": {
@@ -8,11 +8,15 @@
   },
   "files": [
     "dist",
+    "starters",
+    "templates",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build",
+    "bundle": "node scripts/bundle-assets.mjs",
+    "build": "npm run bundle && tsc",
+    "test": "npm run build && node --test test/cli.test.mjs",
+    "prepublishOnly": "npm test",
     "start": "node dist/cli.js"
   },
   "engines": {

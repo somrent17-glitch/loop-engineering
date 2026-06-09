@@ -37,6 +37,8 @@ const STATE_FILES = [
   'pr-babysitter-state.md',
   'ci-sweeper-state.md',
   'post-merge-state.md',
+  'dependency-sweeper-state.md',
+  'changelog-drafter-state.md',
 ];
 
 const LOOP_SKILL_NAMES = [
@@ -47,8 +49,9 @@ const LOOP_SKILL_NAMES = [
   'ci-triage',
   'post-merge-scan',
   'dependency-triage',
-  'post-merge-scan',
   'rebase-and-clean',
+  'changelog-scan',
+  'draft-release-notes',
 ];
 
 const SAFETY_FILES = ['safety.md', 'docs/safety.md', 'SECURITY.md'];
@@ -158,7 +161,8 @@ export async function auditProject(target: string): Promise<AuditResult> {
     skillNames.includes('pr-review-triage') ||
     skillNames.includes('ci-triage') ||
     skillNames.includes('dependency-triage') ||
-    skillNames.includes('post-merge-scan');
+    skillNames.includes('post-merge-scan') ||
+    skillNames.includes('changelog-scan');
 
   let loopMdContent = '';
   if (loopMd) {

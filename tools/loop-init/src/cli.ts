@@ -4,7 +4,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '../../..');
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const MONOREPO_STARTERS = path.resolve(PACKAGE_ROOT, '../../starters');
+const MONOREPO_TEMPLATES = path.resolve(PACKAGE_ROOT, '../../templates');
 
 type Pattern =
   | 'daily-triage'
@@ -30,6 +32,15 @@ const TOOL_SUFFIX: Record<Tool, string> = {
   claude: '-claude',
   codex: '-codex',
 };
+
+const L2_PATTERNS = new Set<Pattern>(['ci-sweeper', 'dependency-sweeper']);
+
+const PATTERNS_NEEDING_FIX: Set<Pattern> = new Set([
+  'pr-babysitter',
+  'ci-sweeper',
+  'dependency-sweeper',
+  'post-merge-cleanup',
+]);
 
 const STATE_FILES: Record<Pattern, string> = {
   'daily-triage': 'STATE.md',
@@ -77,6 +88,79 @@ async function copyDir(src: string, dest: string, dryRun: boolean) {
   await cp(src, dest, { recursive: true });
   console.log(`  copied: ${src} → ${dest}`);
   return true;
+}
+
+async function resolveBundledOrMonorepo(name: 'starters' | 'templates'): Promise<string> {
+  const bundled = path.join(PACKAGE_ROOT, name);
+  if (await exists(bundled)) return bundled;
+  return name === 'starters' ? MONOREPO_STARTERS : MONOREPO_TEMPLATES;
+}
+
+async function copyTemplateSkill(
+  templatesRoot: string,
+  templateFile: string,
+  targetDir: string,
+  tool: Tool,
+  skillName: string,
+  dryRun: boolean,
+) {
+  const src = path.join(templatesRoot, templateFile);
+  const destByTool: Record<Tool, string> = {
+    grok: path.join(targetDir, '.grok', 'skills', skillName, 'SKILL.md'),
+    claude: path.join(targetDir, '.claude', 'skills', skillName, 'SKILL.md'),
+    codex: path.join(targetDir, '.codex', 'skills', skillName, 'SKILL.md'),
+  };
+  const dest = destByTool[tool];
+  if (await exists(dest)) return;
+  await copyFile(src, dest, dryRun);
+}
+
+async function copyTemplateVerifier(
+  templatesRoot: string,
+  targetDir: string,
+  tool: Tool,
+  dryRun: boolean,
+) {
+  const verifierPaths: Record<Tool, string> = {
+    grok: path.join(targetDir, '.grok', 'skills', 'loop-verifier', 'SKILL.md'),
+    claude: path.join(targetDir, '.claude', 'agents', 'loop-verifier.md'),
+    codex: path.join(targetDir, '.codex', 'agents', 'verifier.toml'),
+  };
+  const dest = verifierPaths[tool];
+  if (await exists(dest)) return;
+
+  if (tool === 'codex') {
+    const src = path.join(templatesRoot, 'SKILL.md.verifier');
+    const body = await readFile(src, 'utf8');
+    const toml = `name = "loop-verifier"\ndescription = "Independent verification agent for loop-produced changes."\n\n[system_prompt]\ncontent = """\n${body}\n"""\n`;
+    if (dryRun) {
+      console.log(`  would write verifier: ${dest}`);
+      return;
+    }
+    await mkdir(path.dirname(dest), { recursive: true });
+    await writeFile(dest, toml);
+    console.log(`  created: ${dest} (from verifier template)`);
+    return;
+  }
+
+  const src = path.join(templatesRoot, 'SKILL.md.verifier');
+  await copyFile(src, dest, dryRun);
+}
+
+async function copyL2Templates(
+  pattern: Pattern,
+  tool: Tool,
+  targetDir: string,
+  templatesRoot: string,
+  dryRun: boolean,
+) {
+  if (!PATTERNS_NEEDING_FIX.has(pattern) && !L2_PATTERNS.has(pattern)) return;
+
+  await copyTemplateSkill(templatesRoot, 'SKILL.md.minimal-fix', targetDir, tool, 'minimal-fix', dryRun);
+
+  if (L2_PATTERNS.has(pattern) || pattern === 'dependency-sweeper') {
+    await copyTemplateVerifier(templatesRoot, targetDir, tool, dryRun);
+  }
 }
 
 async function copyFile(src: string, dest: string, dryRun: boolean) {
@@ -162,11 +246,12 @@ Examples:
   const baseStarter = PATTERN_STARTERS[pattern];
   const suffix = TOOL_SUFFIX[tool];
   const starterName = pattern === 'daily-triage' ? `minimal-loop${suffix}` : baseStarter;
-  const starterRoot = path.join(REPO_ROOT, 'starters', starterName);
+  const startersRoot = await resolveBundledOrMonorepo('starters');
+  const templatesRoot = await resolveBundledOrMonorepo('templates');
+  const starterRoot = path.join(startersRoot, starterName);
 
   if (!(await exists(starterRoot))) {
-    // Fall back to grok starter for patterns without per-tool variants
-    const fallback = path.join(REPO_ROOT, 'starters', baseStarter);
+    const fallback = path.join(startersRoot, baseStarter);
     if (!(await exists(fallback))) {
       console.error(`Starter not found: ${starterRoot}`);
       process.exit(1);
@@ -176,7 +261,7 @@ Examples:
 
   const effectiveStarter = (await exists(starterRoot))
     ? starterRoot
-    : path.join(REPO_ROOT, 'starters', baseStarter);
+    : path.join(startersRoot, baseStarter);
 
   console.log(`\nloop-init: ${pattern} → ${targetDir} (${tool})${dryRun ? ' [dry-run]' : ''}\n`);
 
@@ -231,6 +316,8 @@ Examples:
   if (await exists(loopMd)) {
     await copyFile(loopMd, path.join(targetDir, 'LOOP.md'), dryRun);
   }
+
+  await copyL2Templates(pattern, tool, targetDir, templatesRoot, dryRun);
 
   if (!dryRun && !(await exists(path.join(targetDir, 'AGENTS.md')))) {
     const agentsTemplate = `# AGENTS.md

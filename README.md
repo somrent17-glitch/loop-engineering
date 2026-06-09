@@ -16,12 +16,7 @@
 
 <p align="center">
   <img src="assets/cobus-greyling.jpg" alt="Cobus Greyling" />
-  <br>
 </p>
-
-</p>
-
-
 
 **Loop engineering is replacing yourself as the person who prompts the agent. You design the system that does it instead.**
 
@@ -132,6 +127,13 @@ bash scripts/before-after-demo.sh
 /loop 1d Run loop-triage. Update STATE.md. No auto-fix in week one.
 ```
 
+Packages publish from tagged releases — see [docs/RELEASE.md](docs/RELEASE.md). Until npm is live, run from this repo:
+
+```bash
+cd tools/loop-init && npm ci && npm test && node dist/cli.js /path/to/project --pattern daily-triage --tool grok
+cd tools/loop-audit && npm ci && npm test && node dist/cli.js /path/to/project --suggest
+```
+
 Phased rollout: **L1 report → L2 assisted fixes → L3 unattended** — see [loop-design-checklist](docs/loop-design-checklist.md).
 
 ## Examples by Tool
@@ -166,7 +168,7 @@ Addy Osmani:
 
 ## Contributing
 
-Share production patterns, tool mappings, and failure stories. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Share production patterns, tool mappings, and failure stories. See [CONTRIBUTING.md](CONTRIBUTING.md) and [GitHub Discussions](https://github.com/cobusgreyling/loop-engineering/discussions).
 
 ## Sources
 

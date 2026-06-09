@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
  * Validates patterns/registry.yaml against registry.schema.json
- * and ensures file/registry alignment.
+ * and ensures file/registry/starter alignment.
  */
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'yaml';
+import Ajv from 'ajv';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -47,8 +48,18 @@ function validatePattern(p, index) {
 
 async function main() {
   const registryPath = path.join(ROOT, 'patterns', 'registry.yaml');
+  const schemaPath = path.join(ROOT, 'patterns', 'registry.schema.json');
   const raw = await readFile(registryPath, 'utf8');
   const doc = yaml.parse(raw);
+  const schema = JSON.parse(await readFile(schemaPath, 'utf8'));
+  delete schema.$schema;
+
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema);
+  if (!validate(doc)) {
+    fail(`registry schema: ${ajv.errorsText(validate.errors)}`);
+  }
+  console.log('JSON Schema validation passed ✓');
 
   if (!doc?.patterns?.length) fail('registry.yaml must have patterns array');
 
@@ -63,6 +74,15 @@ async function main() {
       await readFile(mdPath, 'utf8');
     } catch {
       fail(`registry entry ${p.id} references missing file: patterns/${p.file}`);
+    }
+    if (p.starter) {
+      try {
+        await stat(path.join(ROOT, p.starter));
+      } catch {
+        fail(`registry entry ${p.id} references missing starter: ${p.starter}`);
+      }
+    } else {
+      fail(`registry entry ${p.id} missing starter path`);
     }
   }
 

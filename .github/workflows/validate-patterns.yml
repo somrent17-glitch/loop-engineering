@@ -12,6 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
       - name: Check registry covers all pattern files
         run: |
           set -e
@@ -44,7 +48,16 @@ jobs:
           test -f templates/loop-budget.md.template || (echo "Missing loop-budget template"; exit 1)
           echo "Templates present ✓"
 
-      - name: Validate registry.yaml schema
+      - name: Validate registry.yaml schema and starter paths
         run: |
-          npm install --no-save yaml@2
+          npm install --no-save yaml@2 ajv@8
           node scripts/validate-registry.mjs
+
+      - name: Verify loop-init pattern sync
+        run: node scripts/check-loop-init-sync.mjs
+
+      - name: Smoke test loop-init package layout
+        run: |
+          cd tools/loop-init
+          npm ci
+          npm test

@@ -4,7 +4,10 @@ Loop engineering runs unattended automation against your codebase. Treat loops l
 
 ## Reporting vulnerabilities
 
-Email security concerns privately if you discover issues in this reference repo or in `loop-audit` / `loop-init` tooling. Do not open public issues for exploitable vulnerabilities.
+Report security issues **privately** — do not open public issues for exploitable vulnerabilities.
+
+- **Preferred:** [GitHub private vulnerability reporting](https://github.com/cobusgreyling/loop-engineering/security/advisories/new)
+- **Email:** security@cobusgreyling.me (PGP on request)
 
 For general loop safety guidance, see [docs/safety.md](docs/safety.md).
 

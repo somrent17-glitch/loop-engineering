@@ -10,6 +10,8 @@ npx @cobusgreyling/loop-init . -p pr-babysitter -t claude
 npx @cobusgreyling/loop-init . -p dependency-sweeper --dry-run
 ```
 
+See [docs/RELEASE.md](../../docs/RELEASE.md) for npm publish tags. The published package bundles `starters/` and `templates/` from this monorepo.
+
 ## Patterns
 
 | Pattern | Default state file |
@@ -19,6 +21,9 @@ npx @cobusgreyling/loop-init . -p dependency-sweeper --dry-run
 | `ci-sweeper` | `ci-sweeper-state.md` |
 | `dependency-sweeper` | `dependency-sweeper-state.md` |
 | `post-merge-cleanup` | `post-merge-state.md` |
+| `changelog-drafter` | `changelog-drafter-state.md` |
+
+L2 patterns (`ci-sweeper`, `dependency-sweeper`) also copy `minimal-fix` and `loop-verifier` templates when missing from the starter.
 
 ## Tools
 
@@ -31,7 +36,7 @@ Falls back to Grok starter paths when a per-tool variant is not yet available.
 ## From this repo
 
 ```bash
-cd tools/loop-init && npm install && npm run build
+cd tools/loop-init && npm ci && npm test
 node dist/cli.js /path/to/project --pattern daily-triage --tool grok
 ```
 

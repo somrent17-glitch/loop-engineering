@@ -20,11 +20,11 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Build & publish
+      - name: Test, build & publish
         working-directory: tools/loop-init
         run: |
-          npm install
-          npm run build
+          npm ci
+          npm test
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
