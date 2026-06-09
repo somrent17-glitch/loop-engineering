@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   issues: write
 
 jobs:
@@ -81,13 +82,41 @@ jobs:
           Run log: Updated by \`.github/workflows/daily-triage.yml\`. See \`LOOP.md\` for cadence and gates.
           EOF
 
-      - name: Commit STATE.md if changed
+      - name: Open PR for STATE.md if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git config user.name "loop-engineering-bot"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet STATE.md; then
+            echo "No STATE.md changes — skip PR"
+            exit 0
+          fi
+
+          BRANCH="automated/daily-triage-$(date -u +%Y-%m-%d)"
+          git checkout -b "$BRANCH"
           git add STATE.md
-          git diff --staged --quiet || git commit -m "chore(loop): daily triage update STATE.md [automated]"
-          git push || echo "No push needed or nothing to commit"
+          git commit -m "chore(loop): daily triage update STATE.md [automated]"
+          git push -u origin "$BRANCH"
+
+          EXISTING=$(gh pr list --head "${{ github.repository_owner }}:${BRANCH}" --base main --state open --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            echo "PR #$EXISTING already open"
+            PR_NUMBER="$EXISTING"
+          else
+            PR_NUMBER=$(gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(loop): daily triage STATE.md $(date -u +%Y-%m-%d)" \
+              --body "Automated daily triage update from \`daily-triage.yml\`.
+
+          - Loop readiness: **${{ steps.audit.outputs.score }}** (${{ steps.audit.outputs.level }})
+          - Merges automatically when \`validate\` and \`audit\` pass." \
+              --json number -q '.number')
+          fi
+
+          gh pr merge "$PR_NUMBER" --auto --squash --delete-branch
 
       - name: Open weekly loop report issue (Mondays)
         if: github.event.schedule == '0 8 * * 1-5' && format('{0}', github.run_attempt) == '1'
