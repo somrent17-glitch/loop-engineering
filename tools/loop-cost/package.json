@@ -1,7 +1,7 @@
 {
   "name": "@cobusgreyling/loop-cost",
   "version": "1.0.1",
-  "description": "Estimate daily token spend for loop engineering patterns by cadence and readiness level.",
+  "description": "Estimate token budgets and daily costs for loop engineering patterns. By cadence, readiness level (L1/L2/L3), and coding agent tool.",
   "type": "module",
   "bin": {
     "loop-cost": "dist/cli.js"
@@ -24,8 +24,13 @@
   "keywords": [
     "loop-engineering",
     "ai-agents",
+    "coding-agents",
     "token-budget",
-    "cost-estimate"
+    "cost-estimate",
+    "claude-code",
+    "grok",
+    "budget",
+    "devtools"
   ],
   "author": "Cobus Greyling",
   "license": "MIT",

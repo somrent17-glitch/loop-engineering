@@ -1,7 +1,7 @@
 {
   "name": "@cobusgreyling/loop-init",
   "version": "1.2.0",
-  "description": "Scaffold loop engineering starters into your project by pattern and tool.",
+  "description": "Scaffold loop engineering patterns and starters into any project. Supports Grok, Claude Code, Codex and more. npx @cobusgreyling/loop-init . --pattern daily-triage --tool grok",
   "type": "module",
   "bin": {
     "loop-init": "./dist/cli.js"
@@ -25,8 +25,14 @@
   "keywords": [
     "loop-engineering",
     "ai-agents",
+    "coding-agents",
     "scaffold",
-    "starter"
+    "starter",
+    "claude-code",
+    "grok",
+    "codex",
+    "github-actions",
+    "patterns"
   ],
   "author": "Cobus Greyling",
   "license": "MIT",

@@ -24,6 +24,8 @@
 
 **Loop engineering is replacing yourself as the person who prompts the agent. You design the system that does it instead.**
 
+For developers using Grok, Claude Code, Codex, Cursor, and other AI coding agents.
+
 A loop is a recursive goal: you define a purpose and the AI iterates (often with sub-agents, verification, and external state) until the goal is complete or the loop decides to hand off to you.
 
 
@@ -33,9 +35,11 @@ A loop is a recursive goal: you define a purpose and the AI iterates (often with
 </p>
 
 <p align="center">
-  <strong><a href="https://cobusgreyling.github.io/loop-engineering/">→ cobusgreyling.github.io/loop-engineering</a></strong>
+  <strong><a href="https://cobusgreyling.github.io/loop-engineering/">→ Interactive showcase + pattern picker</a></strong>
   <br>
-  <strong><a href="https://cobusgreyling.substack.com/p/loop-engineering">→ Read the Loop Engineering essay on Substack</a></strong>
+  <strong><a href="https://cobusgreyling.substack.com/p/loop-engineering">→ Loop Engineering essay (Substack)</a></strong>
+  <br>
+  <a href="https://addyosmani.com/blog/loop-engineering/">Canonical essay by Addy Osmani</a>
 </p>
 
 ## Contents
